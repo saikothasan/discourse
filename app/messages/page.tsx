@@ -1,8 +1,4 @@
-export const metadata = {
-  title: "Messages",
-  description: "View and send private messages in Discourse Clone",
-}
-;("use client")
+"use client"
 
 import { useState, useEffect } from "react"
 import { supabase } from "../../lib/supabase"
