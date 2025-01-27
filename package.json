@@ -58,7 +58,6 @@
     "vaul": "^1.1.2",
     "zod": "^3.24.1",
     "@supabase/supabase-js": "latest",
-    "@radix-ui/react-alert": "latest",
     "react-quill": "latest",
     "tailwindcss": "latest",
     "@tailwindcss/typography": "latest",
