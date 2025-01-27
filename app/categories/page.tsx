@@ -1,8 +1,3 @@
-export const metadata = {
-  title: "Categories",
-  description: "Browse all categories in our Discourse Clone",
-}
-
 import Link from "next/link"
 import { supabase } from "../../lib/supabase"
 
