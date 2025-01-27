@@ -1,101 +1,130 @@
-import Image from "next/image";
+import Link from "next/link"
+import { supabase } from "../lib/supabase"
+import { MessageCircle, Users, TrendingUp, Clock } from "lucide-react"
+import { formatDistanceToNow } from "date-fns"
+import { Card, CardContent, CardHeader, CardTitle } from "../components/ui/card"
 
-export default function Home() {
-  return (
-    <div className="grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen p-8 pb-20 gap-16 sm:p-20 font-[family-name:var(--font-geist-sans)]">
-      <main className="flex flex-col gap-8 row-start-2 items-center sm:items-start">
-        <Image
-          className="dark:invert"
-          src="https://nextjs.org/icons/next.svg"
-          alt="Next.js logo"
-          width={180}
-          height={38}
-          priority
-        />
-        <ol className="list-inside list-decimal text-sm text-center sm:text-left font-[family-name:var(--font-geist-mono)]">
-          <li className="mb-2">
-            Get started by editing{" "}
-            <code className="bg-black/[.05] dark:bg-white/[.06] px-1 py-0.5 rounded font-semibold">
-              app/page.tsx
-            </code>
-            .
-          </li>
-          <li>Save and see your changes instantly.</li>
-        </ol>
-
-        <div className="flex gap-4 items-center flex-col sm:flex-row">
-          <a
-            className="rounded-full border border-solid border-transparent transition-colors flex items-center justify-center bg-foreground text-background gap-2 hover:bg-[#383838] dark:hover:bg-[#ccc] text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="https://nextjs.org/icons/vercel.svg"
-              alt="Vercel logomark"
-              width={20}
-              height={20}
-            />
-            Deploy now
-          </a>
-          <a
-            className="rounded-full border border-solid border-black/[.08] dark:border-white/[.145] transition-colors flex items-center justify-center hover:bg-[#f2f2f2] dark:hover:bg-[#1a1a1a] hover:border-transparent text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 sm:min-w-44"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Read our docs
-          </a>
-        </div>
-      </main>
-      <footer className="row-start-3 flex gap-6 flex-wrap items-center justify-center">
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="https://nextjs.org/icons/file.svg"
-            alt="File icon"
-            width={16}
-            height={16}
-          />
-          Learn
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="https://nextjs.org/icons/window.svg"
-            alt="Window icon"
-            width={16}
-            height={16}
-          />
-          Examples
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="https://nextjs.org/icons/globe.svg"
-            alt="Globe icon"
-            width={16}
-            height={16}
-          />
-          Go to nextjs.org →
-        </a>
-      </footer>
-    </div>
-  );
+export const metadata = {
+  title: "Home",
+  description: "Welcome to Discourse Clone - Join discussions on various topics",
 }
+
+export default async function Home() {
+  const { data: categories, error: categoriesError } = await supabase
+    .from("categories")
+    .select("id, name, description")
+    .order("name", { ascending: true })
+    .limit(5)
+
+  const { data: topics, error: topicsError } = await supabase
+    .from("topics")
+    .select("id, title, created_at, profiles(username), categories(name)")
+    .order("created_at", { ascending: false })
+    .limit(5)
+
+  const { data: trendingTopics, error: trendingTopicsError } = await supabase
+    .from("topics")
+    .select("id, title, created_at, profiles(username), categories(name), posts(count)")
+    .order("posts(count)", { ascending: false })
+    .limit(5)
+
+  if (categoriesError || topicsError || trendingTopicsError) {
+    console.error("Error fetching data:", categoriesError || topicsError || trendingTopicsError)
+  }
+
+  return (
+    <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+      <div className="md:col-span-2 space-y-6">
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center">
+              <Clock className="mr-2" />
+              Recent Topics
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            {topics && topics.length > 0 ? (
+              <div className="space-y-4">
+                {topics.map((topic) => (
+                  <div key={topic.id} className="border-b last:border-b-0 pb-4 last:pb-0">
+                    <Link
+                      href={`/topic/${topic.id}`}
+                      className="text-lg font-medium hover:text-primary transition-colors"
+                    >
+                      {topic.title}
+                    </Link>
+                    <p className="text-sm text-muted-foreground mt-1">
+                      Posted by {topic.profiles.username} in {topic.categories.name} •{" "}
+                      {formatDistanceToNow(new Date(topic.created_at))} ago
+                    </p>
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <p>No topics found.</p>
+            )}
+          </CardContent>
+        </Card>
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center">
+              <TrendingUp className="mr-2" />
+              Trending Topics
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            {trendingTopics && trendingTopics.length > 0 ? (
+              <div className="space-y-4">
+                {trendingTopics.map((topic) => (
+                  <div key={topic.id} className="border-b last:border-b-0 pb-4 last:pb-0">
+                    <Link
+                      href={`/topic/${topic.id}`}
+                      className="text-lg font-medium hover:text-primary transition-colors"
+                    >
+                      {topic.title}
+                    </Link>
+                    <p className="text-sm text-muted-foreground mt-1">
+                      {topic.posts[0].count} posts • Posted by {topic.profiles.username} in {topic.categories.name}
+                    </p>
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <p>No trending topics found.</p>
+            )}
+          </CardContent>
+        </Card>
+      </div>
+      <div>
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center">
+              <Users className="mr-2" />
+              Categories
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            {categories && categories.length > 0 ? (
+              <div className="space-y-4">
+                {categories.map((category) => (
+                  <div key={category.id} className="border-b last:border-b-0 pb-4 last:pb-0">
+                    <Link
+                      href={`/category/${category.id}`}
+                      className="text-lg font-medium hover:text-primary transition-colors"
+                    >
+                      {category.name}
+                    </Link>
+                    <p className="text-sm text-muted-foreground mt-1">{category.description}</p>
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <p>No categories found.</p>
+            )}
+          </CardContent>
+        </Card>
+      </div>
+    </div>
+  )
+}
+
