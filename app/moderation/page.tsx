@@ -1,8 +1,4 @@
-export const metadata = {
-  title: "Moderation",
-  description: "Moderate content and users in Discourse Clone",
-}
-;("use client")
+"use client"
 
 import { useState, useEffect } from "react"
 import { supabase } from "../../lib/supabase"
