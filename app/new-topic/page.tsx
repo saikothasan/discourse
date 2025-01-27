@@ -1,8 +1,4 @@
-export const metadata = {
-  title: "Create New Topic",
-  description: "Start a new discussion in our Discourse Clone",
-}
-;("use client")
+"use client"
 
 import { useState, useEffect } from "react"
 import { useRouter } from "next/navigation"
